@@ -1,2 +1,3 @@
 # Class-Project
-html,css project for web technology partI
+Make simple website using html , css and JS
+Deploy using Azure (static web app) with custom domain
