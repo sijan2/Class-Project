@@ -1,26 +1,40 @@
-const clockEl = document.querySelector('.clock');
-const buttons = document.querySelectorAll('.format button')
-const intervalID = setInterval( generateTime, 1000)
+const searchForm = document.querySelector('form');
+const searchResultDiv = document.querySelector('.search-result');
+const container = document.querySelector('.container');
+let searchQuery = '';
+const APP_ID = "Use Your Own App ID Here";
+const APP_key = "Use Your Own App Key Here";
+// console.log(container)
+searchForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  searchQuery = e.target.querySelector('input').value;
+  fetchAPI();
+})
 
-// console.log(date)
-function generateTime (){
-  const format = clockEl.getAttribute('data-format');
-  const date = new Date;
-  let hour = date.getHours();
-  let timeStatus = '';
-  const min = date.getMinutes();
-  const sec = date.getSeconds();
-  if (format === '12') {
-    timeStatus = (hour >= 12) ? 'PM' : 'AM';
-    hour = (hour > 12) ? hour % 12 : hour;
-  }
-  clockEl.innerHTML = `<h1>${hour} : ${min} : ${sec} ${timeStatus}</h1>`
+async function fetchAPI(){
+  const baseURL = `https://api.edamam.com/search?q=${searchQuery}&app_id=${APP_ID}&app_key=${APP_key}&from=0&to=20`;
+  const response = await fetch(baseURL); 
+  const data = await response.json();
+  generateHTML(data.hits)
+  console.log(data);
 }
 
-buttons.forEach((button)=>{
-  button.addEventListener('click', ()=>{
-    const format = button.getAttribute('data-format');
-    clockEl.setAttribute('data-format', format);
-    generateTime();
+function generateHTML(results){
+  container.classList.remove('initial');
+  let generatedHTML= '';
+  results.map(result => {
+    generatedHTML += `
+      <div class="item">
+        <img src="${result.recipe.image}" alt="img">
+        <div class="flex-container">
+          <h1 class="title">${result.recipe.label}</h1>
+          <a class="view-btn" target="_blank" href="${result.recipe.url}">View Recipe</a>
+        </div>
+        <p class="item-data">Calories: ${result.recipe.calories.toFixed(2)}</p>
+        <p class="item-data">Diet label: ${result.recipe.dietLabels.length > 0 ? result.recipe.dietLabels : 'No Data Found'}</p>
+        <p class="item-data">Health labels: ${result.recipe.healthLabels}</p>
+      </div>
+    `
   })
-})
+  searchResultDiv.innerHTML = generatedHTML;
+}
