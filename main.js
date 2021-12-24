@@ -1,40 +1,46 @@
-const searchForm = document.querySelector('form');
-const searchResultDiv = document.querySelector('.search-result');
-const container = document.querySelector('.container');
-let searchQuery = '';
-const APP_ID = "10e35163";
-const APP_key = "d27de70c0d0065e440af32f720051595";
-// console.log(container)
-searchForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  searchQuery = e.target.querySelector('input').value;
-  fetchAPI();
-})
+window.addEventListener("DOMContentLoaded", function () {
 
-async function fetchAPI(){
-  const baseURL = `https://api.edamam.com/search?q=${searchQuery}&app_id=${APP_ID}&app_key=${APP_key}&from=0&to=20`;
-  const response = await fetch(baseURL); 
-  const data = await response.json();
-  generateHTML(data.hits)
-  console.log(data);
-}
+  // get the form elements defined in your form HTML above
 
-function generateHTML(results){
-  container.classList.remove('initial');
-  let generatedHTML= '';
-  results.map(result => {
-    generatedHTML += `
-      <div class="item">
-        <img src="${result.recipe.image}" alt="img">
-        <div class="flex-container">
-          <h1 class="title">${result.recipe.label}</h1>
-          <a class="view-btn" target="_blank" href="${result.recipe.url}">View Recipe</a>
-        </div>
-        <p class="item-data">Calories: ${result.recipe.calories.toFixed(2)}</p>
-        <p class="item-data">Diet label: ${result.recipe.dietLabels.length > 0 ? result.recipe.dietLabels : 'No Data Found'}</p>
-        <p class="item-data">Health labels: ${result.recipe.healthLabels}</p>
-      </div>
-    `
-  })
-  searchResultDiv.innerHTML = generatedHTML;
+  var form = document.getElementById("test-form");
+  var button = document.getElementById("test-form-submit");
+  var status = document.getElementById("status");
+
+  // Success and Error functions for after the form is submitted
+
+  function success() {
+    form.reset();
+    status.classList.add('success');
+    status.innerHTML = "Thanks!";
+  }
+
+  function error() {
+    status.classList.add('error');
+    status.innerHTML = "Oops! There was a problem.";
+  }
+
+  // handle the form submission event
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var data = new FormData(form);
+    ajax(form.method, form.action, data, success, error);
+  });
+});
+
+// helper function for sending an AJAX request
+
+function ajax(method, url, data, success, error) {
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url);
+  xhr.setRequestHeader("Accept", "application/json");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState !== XMLHttpRequest.DONE) return;
+    if (xhr.status === 200) {
+      success(xhr.response, xhr.responseType);
+    } else {
+      error(xhr.status, xhr.response, xhr.responseType);
+    }
+  };
+  xhr.send(data);
 }
